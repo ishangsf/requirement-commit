@@ -1,0 +1,50 @@
+{
+  "name": "requirement-commit",
+  "displayName": "Requirement Commit",
+  "description": "在Source Control面板中添加需求选择功能",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "SCM Providers"
+  ],
+  "activationEvents": [
+    "onView:scm"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "requirement-commit.selectRequirement",
+        "title": "选择需求"
+      }
+    ],
+    "menus": {
+      "scm/resourceGroup/context": [
+        {
+          "command": "requirement-commit.selectRequirement",
+          "when": "scmProvider == git && scmResourceGroup == changes",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.7",
+    "@types/vscode": "^1.60.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.0",
+    "@typescript-eslint/parser": "^5.30.0",
+    "eslint": "^8.13.0",
+    "typescript": "^4.7.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
