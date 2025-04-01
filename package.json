@@ -3,6 +3,8 @@
   "displayName": "Requirement Commit",
   "description": "在Source Control面板中添加需求选择功能",
   "version": "0.1.0",
+  "publisher": "shunfeng.zhou",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.60.0"
   },
@@ -10,7 +12,8 @@
     "SCM Providers"
   ],
   "activationEvents": [
-    "onView:scm"
+    "onView:scm",
+    "onCommand:requirement-commit.selectRequirement"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -18,6 +21,80 @@
       {
         "command": "requirement-commit.selectRequirement",
         "title": "选择需求"
+      },
+      {
+        "command": "requirement-commit.openSettings",
+        "title": "配置需求接口"
+      },
+      {
+        "command": "requirement-commit.refreshRequirements",
+        "title": "刷新需求列表",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "requirement-commit.applyRequirement",
+        "title": "应用",
+        "icon": "$(check)"
+      }
+    ],
+    "configuration": {
+      "title": "需求提交",
+      "properties": {
+        "requirementCommit.apiUrl": {
+          "type": "string",
+          "default": "http://172.1.1.251/alm/rest/items/",
+          "description": "获取需求列表的API地址"
+        },
+        "requirementCommit.username": {
+          "type": "string",
+          "default": "",
+          "description": "用户名",
+          "scope": "window"
+        },
+        "requirementCommit.apiToken": {
+          "type": "string",
+          "default": "",
+          "description": "API访问令牌",
+          "scope": "window"
+        },
+        "requirementCommit.queryConfigs": {
+          "type": "array",
+          "default": [
+            {
+              "name": "用户故事",
+              "queryParams": "select _valm_Name,_valm_ItemID,_valm_NodeType,_valm_Uid,_valm_LastModifyTime,_valm_AssignedTo,Status,Priority from UserStory where _valm_AssignedTo LIKE '%${username}%' order by _valm_LastModifyTime desc limit 1,10",
+              "descriptionField": "_valm_AssignedTo",
+              "ListItemTemplate": "ItemID:${id} ${title}"
+            },
+            {
+              "name": "缺陷",
+              "queryParams": "select _valm_Name,_valm_ItemID,_valm_NodeType,_valm_Uid,_valm_LastModifyTime,_valm_AssignedTo,Status,Priority from Defect where Status='Open' and _valm_AssignedTo LIKE '%${username}%' order by _valm_LastModifyTime desc limit 1,20",
+              "descriptionField": "_valm_AssignedTo",
+              "ListItemTemplate": "ItemID:${id} ${title}"
+            }
+          ],
+          "description": "需求列表查询配置，JSON数组格式。queryParams支持VSearch查询语句格式，如: select [字段] from [类型] where [条件] order by [字段] limit [偏移值，记录数]。可使用${username}变量引用当前用户名。ListItemTemplate支持模板字符串格式，如:ItemID:${id} ${title}"
+        },
+        "requirementCommit.useMockData": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否使用模拟数据（开发测试时使用）"
+        }
+      }
+    },
+    "views": {
+      "scm": [
+        {
+          "id": "requirementList",
+          "name": "需求列表",
+          "when": "scmProvider == git"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "requirementList",
+        "contents": "鼠标悬停在需求项上，点击右侧应用按钮将其应用到提交信息\n[刷新需求列表](command:requirement-commit.refreshRequirements)"
       }
     ],
     "menus": {
@@ -25,6 +102,64 @@
         {
           "command": "requirement-commit.selectRequirement",
           "when": "scmProvider == git && scmResourceGroup == changes",
+          "group": "inline"
+        }
+      ],
+      "scm/title": [
+        {
+          "command": "requirement-commit.selectRequirement",
+          "when": "scmProvider == git",
+          "group": "navigation"
+        },
+        {
+          "command": "requirement-commit.openSettings",
+          "when": "scmProvider == git",
+          "group": "2_main"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "requirement-commit.openSettings",
+          "when": "resourceLangId == git",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "requirement-commit.openSettings"
+        },
+        {
+          "command": "requirement-commit.selectRequirement"
+        },
+        {
+          "command": "requirement-commit.applyRequirement",
+          "when": "false"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "requirement-commit.openSettings",
+          "when": "gitOpenRepositoryCount != 0",
+          "group": "7_modification"
+        }
+      ],
+      "comments/commentThread/title": [
+        {
+          "command": "requirement-commit.openSettings",
+          "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "requirement-commit.refreshRequirements",
+          "when": "view == requirementList",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "requirement-commit.applyRequirement",
+          "when": "view == requirementList && viewItem == requirement",
           "group": "inline"
         }
       ]
